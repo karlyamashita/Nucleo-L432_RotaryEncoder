@@ -28,6 +28,7 @@ EncodreStruct encoder = {0};
 
 void PollingInit(void)
 {
+	HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
 	TimerCallbackRegisterOnly(&timerCallback, PushButtonPressed);
 }
 
