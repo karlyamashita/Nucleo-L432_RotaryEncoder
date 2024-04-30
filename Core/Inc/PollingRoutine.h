@@ -35,6 +35,7 @@ typedef struct
 void PollingInit(void);
 void PollingRoutine(void);
 
+void CheckEncoder(volatile EncodreStruct *enc);
 void PushButtonPressed(void);
 void PushButtonReleased(void);
 

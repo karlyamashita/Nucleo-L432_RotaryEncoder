@@ -24,7 +24,7 @@ UART_DMA_QueueStruct uart2_msg =
 	.tx.queueSize = UART_DMA_QUEUE_SIZE
 };
 
-EncodreStruct encoder = {0};
+volatile EncodreStruct encoder = {0};
 
 void PollingInit(void)
 {
@@ -35,12 +35,23 @@ void PollingInit(void)
 void PollingRoutine(void)
 {
 	TimerCallbackCheck(&timerCallback);
+	CheckEncoder(&encoder);
+}
+
+void CheckEncoder(volatile EncodreStruct *enc)
+{
+	char str[16] = {0};
+
+	if(encoder.tim1_cnt != encoder.lastCnt) // check if value changed from last interrupt.
+	{
+		encoder.lastCnt = encoder.tim1_cnt; // update lastCnt
+		sprintf(str, "%ld", encoder.tim1_cnt); // save value in str as ASCII value
+		UART_DMA_NotifyUser(&uart2_msg, str, strlen(str), true); // add str to tx queue
+	}
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	char str[16] = {0};
-
 	// keep CNT between 0 and 120 no matter how much the rotary encoder is turned.
 	if(TIM1->CNT > 65000)
 	{
@@ -53,13 +64,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 	encoder.tim1_cnt = TIM1->CNT >> 2; // divide by 4.
 	// 120/4 = 30, so 30 will be the highest number being printed.
-
-	if(encoder.tim1_cnt != encoder.lastCnt) // check if value changed from last interrupt.
-	{
-		encoder.lastCnt = encoder.tim1_cnt; // update lastCnt
-		sprintf(str, "%ld", encoder.tim1_cnt); // save value in str as ASCII value
-		UART_DMA_NotifyUser(&uart2_msg, str, strlen(str), true); // add str to tx queue
-	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
