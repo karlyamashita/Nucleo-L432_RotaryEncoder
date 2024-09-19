@@ -28,14 +28,14 @@
 
 typedef struct
 {
-	uint32_t tim1_cnt;
+	uint32_t tim_cnt;
 	uint32_t lastCnt;
 }EncodreStruct;
 
 void PollingInit(void);
 void PollingRoutine(void);
 
-void CheckEncoder(volatile EncodreStruct *enc);
+void CheckEncoder1(volatile EncodreStruct *enc);
 void PushButtonPressed(void);
 void PushButtonReleased(void);
 
